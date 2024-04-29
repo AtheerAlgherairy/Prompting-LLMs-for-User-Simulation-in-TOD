@@ -1,0 +1,120 @@
+import json
+import pprint
+import re
+
+
+
+
+#==============================
+
+def describe_goal(goal):
+    # Extract the last service domain key for later reference
+    last_key = goal.domains[-1]
+
+    # Initialize the message with the list of services the user wants to interact with
+    msg = "Your goal consists of the following services: " + str(goal.domains) + "\n"
+    msg += "First, "
+
+    # Loop through each service domain in the goal
+    for key in goal.domain_goals.keys():
+        # Describe the current service domain the user wants to interact with
+        msg += "you have to ask for a (" + str(key) + "). You have to"
+
+        # Check the goals associated with the current service domain
+        for item in goal.domain_goals[key].keys():
+            if item == 'inform':
+                # If 'inform' is a goal, list the details the user needs to provide
+                msg += " inform all the following details about the " + str(key) + ":\n"
+                i = 1
+                book_flag = False
+
+                # Loop through each detail to be informed, except for booking details
+                for x in goal.domain_goals[key]['inform']:
+                    if 'book' not in x:
+                        msg += str(i) + ") " + x + " = " + goal.domain_goals[key]['inform'][x] + "\n "
+                        i += 1
+                    else:
+                        book_flag = True
+
+                # If booking details are required, specify them separately
+                if book_flag:
+                    msg += "Also, ask the agent to book the " + str(key) + " for you. Specify the following booking details:\n"
+                    for x in goal.domain_goals[key]['inform']:
+                        if 'book' in x:
+                            msg += x + " = " + goal.domain_goals[key]['inform'][x] + "\n "
+                            book_flag = False
+
+            if item == 'request':
+                # If 'request' is a goal, list the questions the user needs to ask after agent's recommendation
+                msg += "Once the agent recommends a " + str(key) + " for you, you have to request the values of the following(s):\n"
+                i = 1
+                for x in goal.domain_goals[key]['request']:
+                    #msg += str(i) + ") " + str(key) + " " + x + "? \n"
+                    msg += str(i) + ") " + x + "? \n"
+                    i += 1
+
+        # If it's not the last service domain, indicate that the user should move to the next one
+        if key != last_key:
+            msg += "\n\nThen, you move on to the next service, "
+
+    return msg
+
+
+def getInformAttributes(goal):
+    attributes = []
+    for key in goal.domain_goals.keys():
+        inner_dict = goal.domain_goals.get(key, {})  # Get the inner dictionary safely
+        request_dict = inner_dict.get('inform', {})  # Get the 'inform' dictionary safely
+
+        for item in request_dict.keys():
+            attr = str(key) + " " + item
+            attributes.append(attr)
+
+    return attributes
+
+
+def getRequestAttributes(goal):
+
+    attributes = []
+    for key in goal.domain_goals.keys():
+        inner_dict = goal.domain_goals.get(key, {})  # Get the inner dictionary safely
+        request_dict = inner_dict.get('request', {})  # Get the 'request' dictionary safely
+
+        for item in request_dict.keys():
+            attr = str(key) + " " + item
+            attributes.append(attr)
+
+    return attributes
+
+
+#======================================================
+
+def createLanguagePromptFromGoal(goal):
+    
+    prompt= f"""
+
+
+    Pretend you are a user who is looking for some services, and I am the customer service agent.
+    Stay in character for every response you give me. Our conversation is based on the following goal delimited by triple backticks.
+    The goal sets the context for the conversation. Stick to the given goal. 
+    
+    The goal is:
+    ```{describe_goal(goal)}```
+
+    You have to address each service mentioned in the goal ONE BY ONE.
+    Do not end the conversation if there are services that haven't been discussed yet.
+    Only ask questions related to the services and attributes explicitly written in the goal.
+    Do not repeat the information I gave you. 
+    Be clear and simple. Stick to the provided goal.
+    When you believe you have successfully gathered information about all the services and their attributes from the goal, you can conclude the conversation by expressing gratitude.
+    Remember: We flip our turns. You are the user and I am the agent. Do not output sentence like: Is there anything else I can help you with?
+
+    I will start the conversation: Hello, and welcome to our services. How can I assist you today?
+
+    """
+    return prompt
+
+
+#==============================================================
+
+
