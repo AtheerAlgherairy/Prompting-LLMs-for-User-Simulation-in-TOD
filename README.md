@@ -1,227 +1,90 @@
-# ConvLab-3
+# Prompting Large Language Models for User Simulation in Task-Oriented Dialogue Systems
 
-![PyPI](https://img.shields.io/pypi/v/convlab) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/convlab) ![GitHub](https://img.shields.io/github/license/ConvLab/ConvLab-3)
+This repo is forked from:
+## Convlab-3  (Many thanks to all contributors)
+A Python-based toolkit for task-oriented dialogue (TOD) systems. It provides reinforcement learning (RL) toolkit for dialog policy module and components for evaluation. For more details on ConvLab-3, see [paper](https://aclanthology.org/2023.emnlp-demo.9/).
 
-**ConvLab-3** is a flexible dialog system platform based on a **unified data format** for task-oriented dialog (TOD) datasets. The unified format serves as the adapter between TOD datasets and models: datasets are first transformed to the unified format and then loaded by models. In this way, the cost of adapting $M$ models to $N$ datasets is reduced from $M\times N$ to $M+N$. While retaining all features of [ConvLab-2](https://github.com/thu-coai/ConvLab-2),  ConvLab-3 greatly enlarges supported datasets and models thanks to the unified format, and enhances the utility of reinforcement learning (RL) toolkit for dialog policy module. For typical usage, see our [paper](http://arxiv.org/abs/2211.17148). Datasets and Trained models are also available on [Hugging Face Hub](https://huggingface.co/ConvLab).
+To duplicate the code in paper: Prompting Large Language Models for User Simulation in Task-Oriented Dialogue Systems, follow the steps here:
 
-- [Installation](#installation)
-- [Tutorials](#tutorials)
-- [Unified Datasets](#unified-datasets)
-- [Models](#models)
-- [Contributing](#contributing)
-- [Code Structure](#code-structure)
-- [Team](#team)
+
+- [Add your Keys](#add-your-keys)
+- [Playing with prompts?](#playing-with-prompts)
+- [RL Configuration](#rl-configuration)
+- [RL training](#rl-training)
+- [Test dialogue system and Lexical diversity](#test-dialogue-system-and-lexical-diversity)
 - [Citing](#citing)
-- [License](#license)
 
-## Updates
 
-- **2023.8.6**: Add LLM-based models.
-- **2023.2.26**: Update ConvLab on PyPI to 3.0.1 to reflect bug fixes.
-- **2022.11.30**: ConvLab-3 release.
 
-## Installation
+## Add your Keys
 
-You can install ConvLab-3 in one of the following ways according to your need. We use `torch>=1.10.1,<=1.13` and `transformers>=4.17.0,<=4.24.0`. Higher versions of `torch` and `transformers` may also work.
+Two places where you need to put your keys.. 
+ 
+If you want to use ChatGPT simulator, add your Open AI key:
+add your key in line XX this file: `ConvLab-3\convlab\policy\chatgptSimulator\chatgpt_Simulator.py` 
 
-### Git clone and pip install in development mode (Recommend)
+If you want to use Llama simulator, add your HuggingFace access token:
+add your token in line XX in this file: `ConvLab-3\convlab\policy\llamaSimulator\llama_Simulator.py`
 
-For the latest and most configurable version, we recommend installing ConvLab-3 in development mode.
 
-Clone the newest repository:
+## Playing with prompts?
 
-```bash
-git clone --depth 1 https://github.com/ConvLab/ConvLab-3.git
-```
+For chatgpt simulator, the prompt is given in: `ConvLab-3\convlab\policy\chatgptSimulator\Prompt_generator.py`
 
-Install ConvLab-3 via pip:
+For Llama simulator, the prompt is given in: `ConvLab-3\convlab\policy\llamaSimulator\Prompt_generator.py`
 
-```bash
-cd ConvLab-3
-pip install -e .
-```
+We use the same prompt for both models, you can modify it and try other prompts..
 
-### Pip install from PyPI
 
-To use ConvLab-3 as an off-the-shelf tool, you can install via:
+## RL Configuration
 
-```bash
-pip install convlab
-```
-Note that the `data` directory will not be included due to the package size limitation.
+Before you start RL training using PPO, you need to prepare the config file. 
+The config files contains: epochs, number of training dialogues per epoch, number of evaluation dialogues, etc.
+All config files related to RL PPO are in: `ConvLab-3\convlab\policy\ppo\configs`
 
-### Using Docker
+we have add two config files: 
+* For chatgpt simulator: `chatgptSimulator.json`
+* For llama simulator: `llamaSimulator.json`
 
-We also provide [Dockerfile](https://github.com/ConvLab/ConvLab-3/blob/master/Dockerfile) for building docker. Basically it uses the `requirement.txt` and then installs ConvLab-3 in development mode.
+Note: For better performance, imitating learning is done before RL. In the config files, we add a path for pretrained model (MLE) to initialize the policy network for PPO: 
+`ConvLab-3/convlab/policy/mle/experiments/experiment_2023-06-15-14-44-04/save/supervised`
 
-```bash
-# create image
-docker build -t convlab .
 
-# run container
-docker run -dit convlab
 
-# open bash in container
-docker exec -it CONTAINER_ID bash
-```
+## RL training
 
-## Tutorials
+Go to `convlab/policy/ppo` folder and run "train_ppo.py" with the corresponding config file.
 
-- [Getting Started](https://github.com/ConvLab/ConvLab-3/blob/master/tutorials/Getting_Started.ipynb) (Have a try on [Colab](https://colab.research.google.com/github/ConvLab/ConvLab-3/blob/master/tutorials/Getting_Started.ipynb)!)
-- [Introduction to Unified Data Format](https://github.com/ConvLab/ConvLab-3/tree/master/data/unified_datasets)
-- [Utility functions for unified datasets](https://github.com/ConvLab/ConvLab-3/blob/master/convlab/util/unified_datasets_util.py)
-- [RL Toolkit](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/policy)
-- [Interactive Tool](https://github.com/ConvLab/ConvLab-3/blob/master/deploy) [[demo video]](https://youtu.be/00VWzbcx26E)
+For training with chatgpt simulator:
+`
+%run train_ppo.py --config_name="chatgptSimulator"
+`
+For training with llama simulator:
+`
+%run train_ppo.py --config_name="llamaSimulator"
+`
 
-## Unified Datasets
+## Test dialogue system and Lexical diversity
 
-Current datasets in unified data format: (DA-U/DA-S stands for user/system dialog acts)
+For cross model evaluation, you need to specify the trained policy model and the type of simulator for testing.
 
-| Dataset       | Dialogs | Goal               | DA-U               | DA-S               | State              | API result         | DataBase           |
-| ------------- | ------- | ------------------ | ------------------ | ------------------ | ------------------ | ------------------ | ------------------ |
-| Camrest       | 676     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
-| WOZ 2.0       | 1200    |                    | :white_check_mark: |                    | :white_check_mark: |                    |                    |
-| KVRET         | 3030    |                    | :white_check_mark: |                    | :white_check_mark: | :white_check_mark: |                    |
-| DailyDialog   | 13118   |                    | :white_check_mark: |                    |                    |                    |                    |
-| Taskmaster-1  | 13175   |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |                    |                    |
-| Taskmaster-2  | 17303   |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |                    |                    |
-| MultiWOZ 2.1  | 10438   | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
-| Schema-Guided | 22825   |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |                    |
-| MetaLWOZ      | 40203   | :white_check_mark: |                    |                    |                    |                    |                    |
-| CrossWOZ (zh) | 6012    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Taskmaster-3  | 23757   |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |                    |
+Go to `convlab/` folder and run "Test_end2end.py.py" with the following arguments:
 
-Unified datasets are available under `data/unified_datasets` directory as well as [Hugging Face Hub](https://huggingface.co/ConvLab). We will continue adding more datasets listed in [this issue](https://github.com/ConvLab/ConvLab-3/issues/11). If you want to add a listed/custom dataset to ConvLab-3, you can create an issue for discussion and then create pull-request. We will list you as the [contributors](#Team) and highly appreciate your contributions!
+* policy_file: the path to the trained policy model (without pol.mdl), it can be found in: `policy/ppo/finished_experiments/../save/best_ppo`
+* simulator_type: choose the type of simulator to be used in testing: abus, chatgpt, or llama
+* folder_name: the folder for the evaluation results, you will find it under:  `\ConvLab-3\convlab\results`
+* num_of_dialogs: number of dialogues used for evaluation 
 
-## Models
+`%run test_end2end.py --policy_file="../policy/ppo/finished_experiments/../save/best_ppo"  --simulator_type="chatgpt" --folder_name="Testing_using_chatgpt" --num_of_dialogs=500`
 
-We list newly integrated models in ConvLab-3 that support unified data format and obtain strong performance. You can follow the link for more details about these models. Other models can be used in the same way as in ConvLab-2.
+Under `\ConvLab-3\convlab\results\Testing_using_chatgpt` (based on your "folder name"), you will find the followings:
 
-| Task                           | Models                                                       | Input           | Output           |
-| ------------------------------ | ------------------------------------------------------------ | --------------- | ---------------- |
-| Response Generation            | [T5RG](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/base_models/t5), [LLMs](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/base_models/llm) | Context         | Response         |
-| Goal-to-Dialogue                 | [T5Goal2Dialogue](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/base_models/t5) | Goal            | Dialog           |
-| Natural Language Understanding | [T5NLU](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/base_models/t5), [BERTNLU](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/nlu/jointBERT), [MILU](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/nlu/milu), [LLMs](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/base_models/llm) | Context         | DA-U             |
-| Dialog State Tracking          | [T5DST](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/base_models/t5), [SUMBT](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/dst/sumbt), [SetSUMBT](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/dst/setsumbt), [TripPy](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/dst/trippy), [LLMs](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/base_models/llm) | Context         | State            |
-| RL Policy                      | [DDPT](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/policy/vtrace_DPT), [PPO](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/policy/ppo), [PG](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/policy/pg) | State, DA-U, DB | DA-S             |
-| Word-Policy | [LAVA](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/policy/lava) | Context, State, DB | Response |
-| Natural Language Generation    | [T5NLG](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/base_models/t5), [SC-GPT](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/nlg/scgpt), [LLMs](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/base_models/llm) | DA-S            | Response         |
-| End-to-End                     | [SOLOIST](https://github.com/ConvLab/ConvLab-3/blob/master/convlab/e2e/soloist/README.md)                                                      | Context, DB     | State, Response  |
-| User simulator                 | [TUS](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/policy/tus), [GenTUS](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/policy/genTUS), [LLMs](https://github.com/ConvLab/ConvLab-3/tree/master/convlab/base_models/llm) | Goal, DA-S      | DA-U, (Response) |
-
-Trained models are available on [Hugging Face Hub](https://huggingface.co/ConvLab).
-
-## Contributing
-
-We welcome contributions from community. Please see issues to find what we need.
-
-- If you want to add a new dataset, model, or other feature, please describe the dataset/model/feature in an issue with corresponding issue template before creating pull-request.
-- Small change like fixing a bug can be directly made by a pull-request.
-
-## Code Structure
-
-```bash
-.
-├── convlab                             # Source code, installed in pypi package
-│   ├── dialog_agent                    # Interface for dialog agent and session
-│   ├── base_models
-│   │   ├── llm                         # LLM-based models
-│   │   │   ├── user_simulator          # LLM-based user simulator and RG
-│   │   │   ├── dst                     # LLM-based DST
-│   │   │   ├── nlu                     # LLM-based NLU
-│   │   │   └── nlg                     # LLM-based NLG
-│   │   │
-│   │   └── t5                          # T5 models with a unified training script
-│   │       ├── goal2dialogue           # T5Goal2Dialogue
-│   │       ├── dst                     # T5DST
-│   │       ├── nlu                     # T5NLU
-│   │       ├── nlg                     # T5NLG
-│   │       └── rg                      # T5RG
-│   │
-│   ├── nlu                             # NLU models, interface, and evaluation script
-│   │   ├── jointBERT                   # BERTNLU
-│   │   ├── milu                        # MILU
-│   │   └── svm                         # SVMNLU*
-│   │
-│   ├── laug                            # Language understanding AUGmentation (LAUG) toolkit
-│   │
-│   ├── dst                             # DST models, interface, and evaluation script
-│   │   ├── rule                        # RuleDST
-│   │   ├── setsumbt                    # SetSUMBT, has uncertainty estimates
-│   │   ├── sumbt                       # SUMBT
-│   │   ├── trippy                      # TripPy
-│   │   ├── trade                       # TRADE*
-│   │   ├── comer                       # COMER*
-│   │   ├── mdbt                        # MDBT*
-│   │   └── dstc9                       # scripts for DSTC9 cross-lingual DST evaluation
-│   │
-│   ├── policy                          # Policy models, interface, and RL toolkit
-│   │   ├── vector                      # vectorizer class
-│   │   ├── plot_results                # RL plotting tool
-│   │   ├── mle                         # MLE (imitation learning) policy
-│   │   ├── pg                          # Policy Gradient
-│   │   ├── ppo                         # Proximal Policy Optimization
-│   │   ├── vtrace_DPT                  # DDPT
-│   │   ├── lava                        # LAVA
-│   │   ├── rule                        # Rule policies and rule-based user simulators 
-│   │   ├── tus                         # TUS
-│   │   ├── genTUS                      # GenTUS
-│   │   ├── dqn                         # DQN*
-│   │   ├── gdpl                        # GDPL*
-│   │   ├── vhus                        # VHUS*
-│   │   ├── hdsa                        # HDSA*
-│   │   ├── larl                        # LARL*
-│   │   └── mdrg                        # MDRG*
-│   │
-│   ├── nlg                             # NLG models, interface, and evaluation script
-│   │   ├── scgpt                       # SC-GPT
-│   │   ├── sclstm                      # SC-LSTM
-│   │   └── template                    # TemplateNLG*
-│   │
-│   ├── e2e                             # End2End models
-│   │   ├── soloist                     # SOLOIST
-│   │   ├── damd                        # DAMD*
-│   │   └── sequicity                   # Sequicity*
-│   │
-│   ├── evaluator                       # Evaluator for interactive evaluation
-│   ├── human_eval                      # Human evaluation with AMT
-│   ├── task                            # Goal generators for MultiWOZ, CrossWOZ, and Camrest
-│   ├── util
-│   │   └── unified_datasets_util.py    # Utility function for unified data format
-│   └── deploy                          # Deploy system for human conversion
-│
-├── data                                # Data dir, not included in pypi package
-│   ├── ...                             # ConvLab-2 data, not available for pypi installation
-│   └── unified_datasets                # Unified datasets, available for pypi installation
-├── examples
-│   └── agent_examples                  # Examples of building user and system agents
-└── tutorials                           # Tutorials
-```
-
-*: models do not support unified datasets, only support MultiWOZ.
-
-## Team
-
-**ConvLab-3** is maintained and developed by [Tsinghua University Conversational AI](http://coai.cs.tsinghua.edu.cn/) group (THU-COAI), the [Dialogue Systems and Machine Learning Group](https://www.cs.hhu.de/en/research-groups/dialog-systems-and-machine-learning.html) at Heinrich Heine University, Düsseldorf, Germany and Microsoft Research (MSR).
-
-We would like to thank all contributors of ConvLab:
-
-Yan Fang, Zhuoer Feng, Jianfeng Gao, Qihan Guo, Kaili Huang, Minlie Huang, Sungjin Lee, Bing Li, Jinchao Li, Xiang Li, Xiujun Li, Jiexi Liu, Lingxiao Luo, Wenchang Ma, Mehrad Moradshahi, Baolin Peng, Runze Liang, Ryuichi Takanobu, Dazhen Wan, Hongru Wang, Jiaxin Wen, Yaoqin Zhang, Zheng Zhang, Qi Zhu, Xiaoyan Zhu, Carel van Niekerk, Christian Geishauser, Hsien-chin Lin, Nurul Lubis, Xiaochen Zhu, Michael Heck, Shutong Feng, Milica Gašić.
+* res.txt :  for Complete Rate, Success Rate, Precision/Recall/F1 , Dialogue Turns, Successful Dialogue Turns
+* lexical_diversity.txt: for text quality metrics as described in the paper.
 
 ## Citing
 
-If you use ConvLab-3 in your research, please cite:
 
-```
-@article{zhu2022convlab3,
-    title={ConvLab-3: A Flexible Dialogue System Toolkit Based on a Unified Data Format},
-    author={Qi Zhu and Christian Geishauser and Hsien-chin Lin and Carel van Niekerk and Baolin Peng and Zheng Zhang and Michael Heck and Nurul Lubis and Dazhen Wan and Xiaochen Zhu and Jianfeng Gao and Milica Gašić and Minlie Huang},
-    journal={arXiv preprint arXiv:2211.17148},
-    year={2022},
-    url={http://arxiv.org/abs/2211.17148}
-}
-```
 
-## License
 
-Apache License 2.0
+
