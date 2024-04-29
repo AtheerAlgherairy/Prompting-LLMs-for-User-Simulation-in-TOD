@@ -21,17 +21,17 @@ To duplicate the code in paper: Prompting Large Language Models for User Simulat
 Two places where you need to put your keys.. 
  
 If you want to use ChatGPT simulator, add your Open AI key:
-add your key in line XX this file: `ConvLab-3\convlab\policy\chatgptSimulator\chatgpt_Simulator.py` 
+add your key in line 15 this file: `convlab/policy/chatgptSimulator/chatgpt_Simulator.py` 
 
 If you want to use Llama simulator, add your HuggingFace access token:
-add your token in line XX in this file: `ConvLab-3\convlab\policy\llamaSimulator\llama_Simulator.py`
+add your token in line 34 in this file: `convlab/policy/llamaSimulator/llama_Simulator.py`
 
 
 ## Playing with prompts?
 
-For chatgpt simulator, the prompt is given in: `ConvLab-3\convlab\policy\chatgptSimulator\Prompt_generator.py`
+For chatgpt simulator, the prompt is given in: `convlab/policy/chatgptSimulator/Prompt_generator.py`
 
-For Llama simulator, the prompt is given in: `ConvLab-3\convlab\policy\llamaSimulator\Prompt_generator.py`
+For Llama simulator, the prompt is given in: `convlab/policy/llamaSimulator/Prompt_generator.py`
 
 We use the same prompt for both models, you can modify it and try other prompts..
 
@@ -40,14 +40,14 @@ We use the same prompt for both models, you can modify it and try other prompts.
 
 Before you start RL training using PPO, you need to prepare the config file. 
 The config files contains: epochs, number of training dialogues per epoch, number of evaluation dialogues, etc.
-All config files related to RL PPO are in: `ConvLab-3\convlab\policy\ppo\configs`
+All config files related to RL PPO are in: `convlab/policy/ppo/configs/`
 
 we have add two config files: 
 * For chatgpt simulator: `chatgptSimulator.json`
 * For llama simulator: `llamaSimulator.json`
 
 Note: For better performance, imitating learning is done before RL. In the config files, we add a path for pretrained model (MLE) to initialize the policy network for PPO: 
-`ConvLab-3/convlab/policy/mle/experiments/experiment_2023-06-15-14-44-04/save/supervised`
+`convlab/policy/mle/experiments/experiment_2023-06-15-14-44-04/save/supervised`
 
 
 
