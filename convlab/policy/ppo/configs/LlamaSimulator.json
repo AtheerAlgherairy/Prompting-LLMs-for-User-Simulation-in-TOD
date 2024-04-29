@@ -1,0 +1,51 @@
+{
+	"model": {
+		"load_path": "ConvLab-3/convlab/policy/mle/experiments/experiment_2023-06-15-14-44-04/save/supervised",
+		"use_pretrained_initialisation": false,
+		"pretrained_load_path": "",
+		"num_train_dialogues": 100,
+		"seed": 0,
+		"epoch": 10,
+		"eval_frequency": 5,
+		"process_num": 1,
+		"sys_semantic_to_usr": false,
+		"num_eval_dialogues": 500
+	},
+	"vectorizer_sys": {
+		"uncertainty_vector_mul": {
+			"class_path": "convlab.policy.vector.vector_binary.VectorBinary",
+			"ini_params": {
+				"use_masking": true,
+				"manually_add_entity_names": false,
+				"seed": 0
+			}
+		}
+	},
+	 "nlu_sys": {
+        "BertNLU": {
+            "class_path": "convlab.nlu.jointBERT.unified_datasets.BERTNLU",
+            "ini_params": {
+                "mode": "all",
+                "config_file": "multiwoz21_all.json",
+                "model_file": "https://huggingface.co/ConvLab/bert-base-nlu/resolve/main/bertnlu_unified_multiwoz21_all_context0.zip"
+            }
+        }
+    },
+	"dst_sys": {
+		"RuleDST": {
+			"class_path": "convlab.dst.rule.multiwoz.dst.RuleDST",
+			"ini_params": {}
+		}
+	},
+	"sys_nlg": {},
+	"nlu_usr": {},
+	"dst_usr": {},
+	"policy_usr": {
+		"llama": {
+			"class_path": "convlab.policy.llamaSimulator.llama_Simulator.UserPolicy",
+			"ini_params": {}
+		}
+	},
+	"usr_nlg": {}
+}
+
