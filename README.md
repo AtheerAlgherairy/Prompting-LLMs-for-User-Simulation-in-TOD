@@ -4,7 +4,7 @@ This repo is forked from:
 ## Convlab-3  (Many thanks to all contributors)
 A Python-based toolkit for task-oriented dialogue (TOD) systems. It provides reinforcement learning (RL) toolkit for dialog policy module and components for evaluation. For more details on ConvLab-3, see [paper](https://aclanthology.org/2023.emnlp-demo.9/).
 
-To duplicate the code in paper: Prompting Large Language Models for User Simulation in Task-Oriented Dialogue Systems, follow the steps here:
+To duplicate the code in paper: Prompting Large Language Models for User Simulation in Task-Oriented Dialogue Systems, follow the steps:
 
 
 - [Add your Keys](#add-your-keys)
@@ -18,13 +18,13 @@ To duplicate the code in paper: Prompting Large Language Models for User Simulat
 
 ## Add your Keys
 
-Two places where you need to put your keys.. 
+Two places where you need to add your keys.. 
  
-If you want to use ChatGPT simulator, add your Open AI key:
-add your key in line 15 this file: `convlab/policy/chatgptSimulator/chatgpt_Simulator.py` 
+If you want to use ChatGPT simulator:
+add your Open AI key in line 15 this file: `convlab/policy/chatgptSimulator/chatgpt_Simulator.py` 
 
-If you want to use Llama simulator, add your HuggingFace access token:
-add your token in line 34 in this file: `convlab/policy/llamaSimulator/llama_Simulator.py`
+If you want to use Llama simulator:
+add your HuggingFace access token in line 34 in this file: `convlab/policy/llamaSimulator/llama_Simulator.py`
 
 
 ## Playing with prompts?
@@ -57,12 +57,14 @@ Go to `convlab/policy/ppo` folder and run "train_ppo.py" with the corresponding 
 
 For training with chatgpt simulator:
 `
-%run train_ppo.py --config_name="chatgptSimulator"
+python train_ppo.py --config_name="chatgptSimulator"
 `
 For training with llama simulator:
 `
-%run train_ppo.py --config_name="llamaSimulator"
+python train_ppo.py --config_name="llamaSimulator"
 `
+
+Once training is done, you will find the trained policy in `policy/ppo/finished_experiments/../save/best_ppo`
 
 ## Test dialogue system and Lexical diversity
 
@@ -70,17 +72,17 @@ For cross model evaluation, you need to specify the trained policy model and the
 
 Go to `convlab/` folder and run "Test_end2end.py.py" with the following arguments:
 
-* policy_file: the path to the trained policy model (without pol.mdl), it can be found in: `policy/ppo/finished_experiments/../save/best_ppo`
+* policy_file: the path to the trained PPO policy model (without pol.mdl), it can be found in: `policy/ppo/finished_experiments/../save/best_ppo`
 * simulator_type: choose the type of simulator to be used in testing: abus, chatgpt, or llama
 * folder_name: the folder for the evaluation results, you will find it under:  `\ConvLab-3\convlab\results`
 * num_of_dialogs: number of dialogues used for evaluation 
 
-`%run test_end2end.py --policy_file="../policy/ppo/finished_experiments/../save/best_ppo"  --simulator_type="chatgpt" --folder_name="Testing_using_chatgpt" --num_of_dialogs=500`
+`python test_end2end.py --policy_file="../policy/ppo/finished_experiments/../save/best_ppo"  --simulator_type="chatgpt" --folder_name="Testing_using_chatgpt" --num_of_dialogs=500`
 
 Under `\ConvLab-3\convlab\results\Testing_using_chatgpt` (based on your "folder name"), you will find the followings:
 
 * res.txt :  for Complete Rate, Success Rate, Precision/Recall/F1 , Dialogue Turns, Successful Dialogue Turns
-* lexical_diversity.txt: for text quality metrics as described in the paper.
+* lexical_diversity.txt: for text quality metrics as described in [Terragni et al](https://arxiv.org/abs/2306.00774). Thanks for sharing the code in [Github](https://github.com/telepathylabsai/prompt-based-user-simulator).
 
 ## Citing
 
