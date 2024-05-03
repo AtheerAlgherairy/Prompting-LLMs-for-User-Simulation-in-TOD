@@ -48,10 +48,10 @@ def test_end2end(policy_file, type_of_simulator, folder_name, num_of_dialogs):
 
     if type_of_simulator == "llama":
         from convlab.policy.llamaSimulator.llama_Simulator import UserPolicyLlama, UserPolicy
-        my_user = UserPolicyLlama()
+        my_user = UserPolicyLlama(dataset="multiwoz21")
     elif type_of_simulator == "chatgpt":
         from convlab.policy.chatgptSimulator.chatgpt_Simulator import UserPolicyChatGPT, UserPolicy
-        my_user = UserPolicyChatGPT()
+        my_user = UserPolicyChatGPT(dataset="multiwoz21")
     elif type_of_simulator == "abus":
         from convlab.policy.rule.multiwoz import RulePolicy
         my_user = RulePolicy(character='usr')
