@@ -86,7 +86,15 @@ Under `\ConvLab-3\convlab\results\Testing_using_chatgpt` (based on your "folder 
 
 ## Citing
 
-
+@article{algherairy2025prompting,
+  title={Prompting large language models for user simulation in task-oriented dialogue systems},
+  author={Algherairy, Atheer and Ahmed, Moataz},
+  journal={Computer Speech \& Language},
+  volume={89},
+  pages={101697},
+  year={2025},
+  publisher={Elsevier}
+}
 
 
 
